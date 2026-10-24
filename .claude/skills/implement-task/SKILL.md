@@ -4,12 +4,12 @@ description: Implement exactly one task from docs/tasks.md by its ID (for exampl
 argument-hint: <task-id>
 disable-model-invocation: true
 metadata:
-  version: "0.1"
+  version: "0.2"
 ---
 
 # implement-task
 
-Version 0.1. Revise after the first few runs.
+Version 0.2. Revised after the first real run (P0-02).
 
 Task ID: $0
 
@@ -57,11 +57,15 @@ Read the **Depends on** line and the **Status** line of each dependency.
 
 On any hard stop, list every failing dependency, not just the first, and end the turn.
 
-## Step 4: Branch
+## Step 4: Sync and branch
 
-1. Run `git status`. If the working tree has changes or you are not on `main`, stop and show the user. Do not stash, reset or switch over someone's work.
-2. Create the branch: `git switch -c feat/<task-id>-<short-name>`, with the task ID in lower case and a short name of two to four words from the task title, for example `feat/p1-07-wire-schemas`.
-3. Do not pull or push.
+1. Ask the user to sync `main` in GitHub Desktop: switch to `main`, click Fetch origin, then Pull origin. You do not fetch, pull or push, so your view of `origin/main` is only as fresh as their last fetch. A branch cut from a stale `main` gives the PR avoidable conflicts.
+
+   **STOP.** Wait for the user to confirm `main` is synced.
+
+2. Run `git status -sb`. Stop and show the user if any of these hold: the working tree has changes, you are not on `main`, or `main` is ahead of or behind `origin/main`. Do not stash, reset or switch over someone's work.
+3. Create the branch: `git switch -c feat/<task-id>-<short-name>`, with the task ID in lower case and a short name of two to four words from the task title, for example `feat/p1-07-wire-schemas`.
+4. Do not pull or push.
 
 ## Step 5: Plan
 
@@ -71,13 +75,15 @@ Write a plan with:
 - **Approach:** a short description of how.
 - **Tests:** which tests you will add and what each covers.
 - **Acceptance mapping:** one line per acceptance criterion and one for the Test line, saying how each will be checked and whether that can be automated or needs a person.
+- **Later tasks:** read the Files line of every task after this one in docs/tasks.md and list any path this change affects. Examples: an ignore rule that would hide a file a later task must commit, a file this task creates that a later task also expects to create, or a path this task moves or renames. For each conflict, say which task and what you propose. Write "none found" if there are none. In P0-02, a `.gitignore` rule would have hidden files that P1-19 and P1-21 commit, and this check is what catches that early.
+- **Scope changes:** every file the plan edits that is not on the task's Files line, including docs/tasks.md edits for other tasks. Each one needs explicit approval. Keep the list; it goes into the PR description in Step 13. Write "none" if there are none.
 - **Flags:** any new dependency, any change to PRD.md or architecture.md, any change to wire formats in packages/schemas (CLAUDE.md requires architecture.md to be updated with it), any TBD value the task touches.
 
-**STOP.** Wait for the user to approve or change the plan.
+**STOP.** Wait for the user to approve or change the plan, including each scope change.
 
 ## Step 6: Implement
 
-Do only what the approved plan covers. If you find the plan needs to change, describe the change and wait for approval before doing it. Follow the rules in CLAUDE.md (normalization parity, no data or secrets in git, privacy rules for logs).
+Do only what the approved plan covers. If you find the plan needs to change, describe the change and wait for approval before doing it. A change that touches a file outside the task's Files line is a new scope change: add it to the list. Follow the rules in CLAUDE.md (normalization parity, no data or secrets in git, privacy rules for logs).
 
 ## Step 7: Lint and tests
 
@@ -115,14 +121,48 @@ P1-07: add LandmarkPacket and Caption v1 schemas
 
 Add any attribution lines your environment requires. Do not push.
 
-## Step 11: Propose the status update
+## Step 11: Independent check
 
-Show the exact change to the task's Status line in docs/tasks.md. Usually `todo` to `in progress` while work continues, or to `done` only if every row in the evidence table is pass or the user has confirmed each "needs human check" row.
+Ask the user to run `/verify-task $0` on this branch. It runs in a fresh context and checks the files, not your reports.
 
-**STOP.** Apply it only after approval, as a separate commit:
+**STOP.** Wait for the user to share the result. If it reports any fail, describe the fix and go back to Step 6 once the user approves it. Points it raises outside the criteria (for example scope changes) go into the PR description.
+
+## Step 12: Status update
+
+Propose the exact change to the task's Status line in docs/tasks.md:
+
+- `done` only if verify-task reports no fail and the user has confirmed each "needs human check" row.
+- Otherwise `in progress`, with a note of what remains.
+
+**STOP.** Apply it only after the user approves. Commit it on the same task branch, as a separate commit, so the status change ships in the same PR as the work:
 
 ```
-<task-id>: status <old> -> <new>
+<task-id>: mark <status>
 ```
 
-Then remind the user that `/verify-task $0` gives an independent check before merging.
+For example `P0-03: mark done` or `P0-05: mark blocked (waiting on reviewer reply)`.
+
+## Step 13: PR description
+
+Print a PR description the user can paste into GitHub Desktop or GitHub. You do not open the PR yourself. Use this structure:
+
+```markdown
+## <task-id>: <task title>
+
+### Summary
+<two to four sentences: what changed and why>
+
+### Scope changes
+<each approved file outside the task's Files line, with the reason; or "None">
+
+### Known gaps
+<anything deferred, out of scope, or "needs human check"; or "None">
+
+### Verification
+verify-task: <n> pass, <n> fail, <n> needs human check.
+<one line per "needs human check" row and who confirmed it>
+
+Status: <old> -> <new> (commit <short hash>)
+```
+
+Add any attribution lines your environment requires for PR descriptions.
