@@ -40,7 +40,7 @@ Exit criteria (PRD 10): domain list frozen; dataset coverage checked; LiveKit ch
 - **Depends on:** none
 
 ### P0-02 Repository scaffold (1 d)
-- **Status:** todo
+- **Status:** done
 - **Goal:** Create the directory layout from architecture section 11 with placeholder READMEs, plus `.gitignore` and `.env.example`.
 - **Files:** `apps/*`, `services/*`, `packages/*` (including `packages/schemas`), `ml/*`, `infra/`, `.gitignore`, `.env.example`, `README.md`
 - **Acceptance:** Layout matches architecture section 11 plus `packages/schemas`. `.gitignore` excludes `.env`, video files, raw landmark dumps and dataset folders.
