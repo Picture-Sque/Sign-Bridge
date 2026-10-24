@@ -1,0 +1,30 @@
+# Workspace root (decision 0001). Not a package itself: it holds the shared
+# lockfile, dev tools, and Ruff and pytest settings.
+[project]
+name = "signbridge"
+version = "0.0.0"
+requires-python = ">=3.11,<3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest", "ruff"]
+
+[tool.uv]
+package = false
+required-version = "==0.13.5"
+
+[tool.uv.workspace]
+# Each task that adds a Python package lists it here. CI syncs light members
+# with `uv sync --package <name> --group dev` so PyTorch and ONNX Runtime are
+# never installed there.
+members = []
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.format]
+# Docs are written by hand; leave code blocks in Markdown alone.
+exclude = ["*.md"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"

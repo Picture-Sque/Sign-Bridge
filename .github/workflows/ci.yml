@@ -1,0 +1,78 @@
+# Lint and tests (decision 0001). Linux jobs run on every push; the Windows
+# job runs on pull requests to main only, so PR commits are not tested on
+# Linux twice.
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  # Keep in step with [tool.uv] required-version in pyproject.toml.
+  UV_VERSION: "0.13.5"
+
+jobs:
+  ts:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: lint
+        run: npm run lint
+      # Run tests even if lint failed, but not if setup or install failed.
+      - if: success() || steps.lint.outcome == 'failure'
+        run: npm test
+
+  python:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+      # Python lint is a root npm script, so Node is needed here too.
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: uv sync --locked
+      - id: lint
+        run: npm run lint:py
+      - if: success() || steps.lint.outcome == 'failure'
+        run: uv run pytest
+
+  windows:
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+      # Install both toolchains first. Every check then runs as long as both
+      # installs succeeded, even if an earlier check failed.
+      - id: npm-ci
+        run: npm ci
+      - id: uv-sync
+        run: uv sync --locked
+      - if: ${{ !cancelled() && steps.npm-ci.outcome == 'success' && steps.uv-sync.outcome == 'success' }}
+        run: npm run lint
+      - if: ${{ !cancelled() && steps.npm-ci.outcome == 'success' && steps.uv-sync.outcome == 'success' }}
+        run: npm test
+      - if: ${{ !cancelled() && steps.npm-ci.outcome == 'success' && steps.uv-sync.outcome == 'success' }}
+        run: npm run lint:py
+      - if: ${{ !cancelled() && steps.npm-ci.outcome == 'success' && steps.uv-sync.outcome == 'success' }}
+        run: uv run pytest
