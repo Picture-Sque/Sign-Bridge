@@ -15,5 +15,19 @@
       "Read(/**/.env)",
       "Edit(/ml/data/raw/**)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/format.mjs\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
   }
 }
