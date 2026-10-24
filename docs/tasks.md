@@ -50,7 +50,7 @@ Exit criteria (PRD 10): domain list frozen; dataset coverage checked; LiveKit ch
 - **Depends on:** none
 
 ### P0-03 Dev tooling and CI (2 d) **Decision**
-- **Status:** todo
+- **Status:** done
 - **Goal:** Pick and set up package managers, linters, formatters and test runners for TypeScript and Python 3.11. Run lint and tests on every push.
 - **Files:** root `package.json` (workspaces), `package-lock.json`, `pyproject.toml` files, `uv.lock`, `.python-version`, Node version pin, lint and test configs, placeholder tests, `.gitattributes`, CI config (`.github/workflows/ci.yml`), `docs/decisions/0001-tooling.md`, `CLAUDE.md` Stack and Commands sections, `README.md` (setup steps)
 - **Acceptance:** One command each for lint and test, for TS and Python, that pass on the empty scaffold. CI runs them. CLAUDE.md Commands section filled in. Licence of each chosen tool confirmed from its installed package metadata and recorded in decision 0001's licence table.
