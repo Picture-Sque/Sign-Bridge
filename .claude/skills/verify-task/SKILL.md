@@ -7,12 +7,12 @@ agent: general-purpose
 background: false
 disallowed-tools: Edit, Write, NotebookEdit
 metadata:
-  version: "0.1"
+  version: "0.1.1"
 ---
 
 # verify-task
 
-Version 0.1. Revise after the first few runs.
+Version 0.1.1. Revise after the first few runs.
 
 Task ID: $0
 
@@ -23,7 +23,7 @@ You are an independent reviewer for SignBridge Meet. Someone else implemented ta
 Do not edit, create or delete files. Do not commit, switch branches, stash, change any Status line, install packages or make network calls. Use Bash only for:
 
 - the lint and test commands listed in CLAUDE.md
-- read-only git: `git status`, `git diff`, `git log --stat`, `git show --stat`, `git ls-files`, `git branch --show-current`
+- read-only git: `git status`, `git diff`, `git log --stat`, `git show --stat`, `git ls-files`, `git branch --show-current`, `git check-ignore -v <paths>`
 
 If a check would need anything else, mark it "needs human check" and say what a person should run. A reviewer that changes things is no longer independent.
 
