@@ -40,7 +40,7 @@ Exit criteria (PRD 10): domain list frozen; dataset coverage checked; LiveKit ch
 - **Depends on:** none
 
 ### P0-02 Repository scaffold (1 d)
-- **Status:** todo
+- **Status:** done
 - **Goal:** Create the directory layout from architecture section 11 with placeholder READMEs, plus `.gitignore` and `.env.example`.
 - **Files:** `apps/*`, `services/*`, `packages/*` (including `packages/schemas`), `ml/*`, `infra/`, `.gitignore`, `.env.example`, `README.md`
 - **Acceptance:** Layout matches architecture section 11 plus `packages/schemas`. `.gitignore` excludes `.env`, video files, raw landmark dumps and dataset folders.
@@ -208,6 +208,7 @@ Workstreams can run in parallel: A (meeting platform), B (landmarks and transpor
 - **Goal:** `landmarks-py`: shoulder-midpoint origin, shoulder-width scale, missing-hand zero-fill with presence flags, short-gap interpolation, mirror-with-channel-swap helper for augmentation.
 - **Files:** `packages/landmarks-py/`
 - **Acceptance:** Each step is a tested function. Golden fixtures (input frames and expected output) committed, generated from synthetic data, not real recordings.
+- **Note:** Fixtures are JSON.
 - **Test:** Unit tests per step, including edge cases: both hands missing, gap longer than the interpolation limit, zero shoulder width.
 - **Depends on:** P0-03, P1-06
 
@@ -312,7 +313,7 @@ Workstreams can run in parallel: A (meeting platform), B (landmarks and transpor
 #### P1-19 Annotation format and isolated labelling (1.5 d) **Decision**
 - **Status:** todo
 - **Goal:** FR-T3 first pass. Define the annotation format (gloss labels now, sentence boundaries later) and pick a tool. Label isolated-sign takes.
-- **Files:** `ml/data/` (format spec), `docs/decisions/0007-annotation.md`
+- **Files:** `ml/data/annotation-format.md`, `docs/decisions/0007-annotation.md`
 - **Acceptance:** Format covers gloss, start and end frame, annotator, review status. Isolated takes can be labelled in it.
 - **Test:** Two team members label the same 20 takes and compare.
 - **Depends on:** P1-18
@@ -330,7 +331,7 @@ Workstreams can run in parallel: A (meeting platform), B (landmarks and transpor
 #### P1-21 Public data extraction (2 d)
 - **Status:** todo
 - **Goal:** Extract landmarks from INCLUDE clips for the 10 signs with the same point set and `landmarks-py`.
-- **Files:** `ml/data/` (extraction script and manifests; extracted data stays out of git)
+- **Files:** `ml/data/scripts/` (extraction script), `ml/data/manifests/`
 - **Acceptance:** Every selected clip has extracted landmarks or a logged failure reason. Differences between offline Python MediaPipe and browser MediaPipe on the same clip are measured and noted.
 - **Test:** Run on 20 clips, inspect overlay plots, compare a few against browser capture of the same video.
 - **Depends on:** P0-07, P0-08, P1-08
