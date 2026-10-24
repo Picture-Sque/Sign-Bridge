@@ -316,6 +316,8 @@ signbridge/
   packages/
     landmarks-ts/     Normalization, TypeScript
     landmarks-py/     Normalization, Python (reference implementation)
+    capture-web/      Browser webcam + MediaPipe capture, shared by web and recorder
+    schemas/          Wire formats (LandmarkPacket, Caption), TS and Python
   ml/
     data/             Manifests, split definitions (no raw data in git)
     train/            Training code and configs
