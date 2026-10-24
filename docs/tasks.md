@@ -23,7 +23,7 @@ Each task is sized at 1 to 2 days for one person. Estimates are guesses until th
 
 Each task has a **Status**: `todo`, `in progress`, `blocked (<reason>)` or `done`. A status changes only through an approved update. `blocked` is set when a task is actually waiting on something, such as an outside person, and always gives the reason.
 
-Tasks marked **Decision** produce a short record in `docs/decisions/` and no code. Tasks marked **External** depend on people outside the team and can slip for reasons we do not control. Any new dependency named below still needs approval before it is added (CLAUDE.md).
+Tasks marked **Decision** produce a record in `docs/decisions/` that must be Accepted before implementation starts, except measurement code for a record marked Proposed (needs measurement). Tasks marked **External** depend on people outside the team and can slip for reasons we do not control. Any new dependency named below still needs approval before it is added (CLAUDE.md).
 
 ---
 
