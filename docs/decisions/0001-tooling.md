@@ -255,17 +255,28 @@ The corepack (3B) and Biome (4B) items no longer apply because those options wer
 
 ### Licences of chosen tools
 
-None of these were confirmed in this repo. All are expected to be permissive, and each stays **to verify** against the linked repository before the dependency is added in P0-03.
+Confirmed in P0-03 from installed package metadata: `license` in `node_modules/<pkg>/package.json` for npm packages, and `importlib.metadata` for Python packages. uv was installed with winget, which leaves no package metadata, so its row was read from the PyPI package of the same version in a throwaway `uv run --no-project --isolated --with uv==0.13.5` environment. `@eslint/js` was approved during P0-03 planning; ESLint's recommended JS rules need it in a flat config.
 
-| Tool | Expected licence | Link |
-|---|---|---|
-| uv | MIT or Apache-2.0 (dual), to verify | https://github.com/astral-sh/uv |
-| Ruff | MIT, to verify | https://github.com/astral-sh/ruff |
-| pytest | MIT, to verify | https://github.com/pytest-dev/pytest |
-| ESLint | MIT, to verify | https://github.com/eslint/eslint |
-| typescript-eslint | MIT, to verify | https://github.com/typescript-eslint/typescript-eslint |
-| eslint-plugin-react-hooks | MIT, to verify | https://github.com/facebook/react (packages/eslint-plugin-react-hooks) |
-| Prettier | MIT, to verify | https://github.com/prettier/prettier |
-| eslint-config-prettier | MIT, to verify | https://github.com/prettier/eslint-config-prettier |
-| Vitest | MIT, to verify | https://github.com/vitest-dev/vitest |
-| TypeScript | Apache-2.0, to verify | https://github.com/microsoft/TypeScript |
+| Tool | Version checked | Licence | Link |
+|---|---|---|---|
+| uv | 0.13.5 | MIT OR Apache-2.0 | https://github.com/astral-sh/uv |
+| Ruff | 0.17.2 | MIT | https://github.com/astral-sh/ruff |
+| pytest | 9.1.1 | MIT | https://github.com/pytest-dev/pytest |
+| ESLint | 10.13.0 | MIT | https://github.com/eslint/eslint |
+| @eslint/js | 10.0.1 | MIT | https://github.com/eslint/eslint (packages/js) |
+| typescript-eslint | 8.72.0 | MIT | https://github.com/typescript-eslint/typescript-eslint |
+| eslint-plugin-react-hooks | 7.1.1 | MIT | https://github.com/facebook/react (packages/eslint-plugin-react-hooks) |
+| Prettier | 3.9.10 | MIT | https://github.com/prettier/prettier |
+| eslint-config-prettier | 10.1.8 | MIT | https://github.com/prettier/eslint-config-prettier |
+| Vitest | 5.0.5 | MIT | https://github.com/vitest-dev/vitest |
+| TypeScript | 6.0.3 | Apache-2.0 | https://github.com/microsoft/TypeScript |
+
+### `uv sync --package` check (P0-03)
+
+Checked with uv 0.13.5 on a throwaway workspace outside the repo: a root with a `dev` group, a light member depending on `six`, and a heavy member depending on `packaging`.
+
+- `uv sync --package light` installed `light` and `six` only. The heavy member and the root `dev` group were not installed.
+- `uv sync --package light --group dev` installed `light`, `six` and the root `dev` group, without the heavy member.
+- A member glob that matched a directory with no `pyproject.toml` did not stop `uv lock`.
+
+So CI can use `uv sync --package <name> --group dev` for light members once heavy members exist. The 1B fallback is not needed.

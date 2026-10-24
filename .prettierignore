@@ -1,0 +1,9 @@
+# Docs are written by hand; Prettier would reflow tables and lists.
+*.md
+
+# Generated
+package-lock.json
+uv.lock
+
+# Personal and tool settings
+.claude/

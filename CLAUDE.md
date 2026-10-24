@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-SignBridge Meet is a web meeting platform with live Indian Sign Language (ISL) to English captioning, plus optional Malayalam captions and TTS. The repo currently contains only design docs: [docs/PRD.md](docs/PRD.md), [docs/architecture.md](docs/architecture.md), and [docs/tasks.md](docs/tasks.md), which breaks Phase 0 and Phase 1 into tasks with stable IDs, dependencies and acceptance criteria. There is no code, build system, or test runner yet. Update this file when those land.
+SignBridge Meet is a web meeting platform with live Indian Sign Language (ISL) to English captioning, plus optional Malayalam captions and TTS. The repo contains design docs ([docs/PRD.md](docs/PRD.md), [docs/architecture.md](docs/architecture.md), and [docs/tasks.md](docs/tasks.md), which breaks Phase 0 and Phase 1 into tasks with stable IDs, dependencies and acceptance criteria), decision records in [docs/decisions/](docs/decisions/), and the dev tooling and CI from P0-03. There is no application code yet; the only tests are the toolchain placeholders in `tests/`. Update this file as code lands.
 
 Read docs/PRD.md and docs/architecture.md before planning any feature. When working on a task from docs/tasks.md, use its ID and check its dependencies.
 
@@ -14,9 +14,24 @@ The docs are drafts. Values marked TBD or "tunable" are deliberately unset and m
 
 React + TS (apps/web), Python 3.11 (services/, ml/), LiveKit, Docker Compose.
 
+Tooling ([decision 0001](docs/decisions/0001-tooling.md)): Node 24 with npm workspaces (`apps/*`, `packages/*`), ESLint + Prettier, Vitest. uv workspace with one `uv.lock` (uv version pinned in `pyproject.toml`), Ruff for lint and format, pytest. GitHub Actions CI. Text files are LF (`.gitattributes`).
+
 ## Commands
 
-(fill in as they appear: dev server, tests, lint, docker compose up)
+Setup: install Node 24 and uv (the version in `[tool.uv] required-version`), then run `npm install` and `uv sync`.
+
+| Purpose | Command |
+|---|---|
+| TS lint (ESLint + Prettier check) | `npm run lint` |
+| TS test (Vitest) | `npm test` |
+| Python lint (`ruff check` + `ruff format --check`) | `npm run lint:py` |
+| Python test (pytest) | `uv run pytest` |
+
+To fix formatting: `npx prettier --write .` and `uv run ruff format`.
+
+CI (`.github/workflows/ci.yml`) runs all four on Linux on every push, and again on Windows for pull requests to `main`.
+
+Adding a package: list a new TS package under `apps/` or `packages/` with its own `package.json` (the workspace globs pick it up). Add a new Python package to `[tool.uv.workspace] members` in the root `pyproject.toml` and run `uv lock`. Commit the updated lockfiles. Once a member with heavy dependencies (PyTorch, ONNX Runtime) exists, CI must stop using plain `uv sync` and sync light members with `uv sync --locked --package <name> --group dev`, so heavy packages are never installed there (decision 0001). Dev server and `docker compose up` commands arrive with the tasks that add them.
 
 ## Architecture (big picture)
 

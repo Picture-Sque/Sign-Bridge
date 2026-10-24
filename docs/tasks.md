@@ -25,6 +25,8 @@ Each task has a **Status**: `todo`, `in progress`, `blocked (<reason>)` or `done
 
 Tasks marked **Decision** produce a record in `docs/decisions/` that must be Accepted before implementation starts, except measurement code for a record marked Proposed (needs measurement). Tasks marked **External** depend on people outside the team and can slip for reasons we do not control. Any new dependency named below still needs approval before it is added (CLAUDE.md).
 
+Tasks that add a package also update the root workspace list (`package.json` / `pyproject.toml`) and lockfiles; these are in scope without being listed.
+
 ---
 
 ## Phase 0: Foundations (weeks 1 to 3)
