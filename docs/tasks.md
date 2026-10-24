@@ -50,8 +50,8 @@ Exit criteria (PRD 10): domain list frozen; dataset coverage checked; LiveKit ch
 ### P0-03 Dev tooling and CI (2 d) **Decision**
 - **Status:** todo
 - **Goal:** Pick and set up package managers, linters, formatters and test runners for TypeScript and Python 3.11. Run lint and tests on every push.
-- **Files:** root `package.json` (workspaces), `pyproject.toml` files, lint configs, CI config, `docs/decisions/0001-tooling.md`, `CLAUDE.md` Commands section
-- **Acceptance:** One command each for lint and test, for TS and Python, that pass on the empty scaffold. CI runs them. CLAUDE.md Commands section filled in.
+- **Files:** root `package.json` (workspaces), `package-lock.json`, `pyproject.toml` files, `uv.lock`, `.python-version`, Node version pin, lint and test configs, placeholder tests, `.gitattributes`, CI config (`.github/workflows/ci.yml`), `docs/decisions/0001-tooling.md`, `CLAUDE.md` Stack and Commands sections, `README.md` (setup steps)
+- **Acceptance:** One command each for lint and test, for TS and Python, that pass on the empty scaffold. CI runs them. CLAUDE.md Commands section filled in. Licence of each chosen tool confirmed from its installed package metadata and recorded in decision 0001's licence table.
 - **Test:** Push a branch with a deliberate lint error and a failing placeholder test. CI fails. Fix both. CI passes.
 - **Depends on:** P0-02. Tool choices need team approval.
 
@@ -202,6 +202,7 @@ Workstreams can run in parallel: A (meeting platform), B (landmarks and transpor
 - **Acceptance:** Both languages encode and decode both message types. Point list for v1 is hands + upper-body pose; face subset left out and noted as open. Version field checked on decode.
 - **Test:** Cross-language round-trip: TS encodes fixtures, Python decodes and compares, and the reverse. Size of a 100 ms packet recorded.
 - **Depends on:** P0-03, P1-06 (point count)
+- **Note:** Revisit type checking (`tsc --noEmit`, mypy or pyright) now that cross-language schemas exist (decision 0001).
 
 #### P1-08 Python reference normalization (2 d)
 - **Status:** todo
@@ -363,10 +364,11 @@ Workstreams can run in parallel: A (meeting platform), B (landmarks and transpor
 #### P1-24 ONNX export and parity check (1 d)
 - **Status:** todo
 - **Goal:** Export the classifier to ONNX and confirm ONNX Runtime matches PyTorch.
-- **Files:** `ml/train/` (export), `ml/eval/`
+- **Files:** `ml/train/` (export), `ml/eval/`, `.github/workflows/ci.yml`
 - **Acceptance:** Max output difference on the test split below a stated tolerance. CPU inference time per window recorded.
 - **Test:** Parity script over the test split.
 - **Depends on:** P1-23
+- **Note:** Add a separate CI job that installs ONNX Runtime (no PyTorch) and runs the parity tests (decision 0001). Settle where the CI job gets the model and the PyTorch reference outputs, since `*.onnx` is git-ignored.
 
 #### P1-25 Agent inference and caption publish (2 d)
 - **Status:** todo

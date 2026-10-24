@@ -1,9 +1,9 @@
 # 0001: Dev tooling and CI
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Task:** P0-03
-- **Decided by:**
-- **Date:**
+- **Decided by:** Krishnadas P S, on behalf of the team (decision delegated by the team)
+- **Date:** 2026-10-24
 
 ## Context
 
@@ -201,6 +201,8 @@ Follow-up edits to docs/tasks.md, each needing separate approval later (Status l
 
 ## Open questions
 
+All five were answered when the record was accepted. The answers are in the Decision section. The text below is kept as it stood at review.
+
 Items 2 to 5 have proposed answers. They are not decisions until the team accepts this record.
 
 1. Which operating systems does the team use? The CI runner matrix depends on it. Ubuntu only is cheapest. Adding Windows and/or macOS catches OS-specific breakage, which R7 asks for, but costs more minutes. Still open until the team's operating systems are confirmed.
@@ -212,3 +214,58 @@ Items 2 to 5 have proposed answers. They are not decisions until the team accept
    **Proposed, pending team decision:** deferred. Revisit at P1-07, when cross-language schemas arrive. See Planned follow-ups.
 5. Pre-commit hooks for formatting?
    **Proposed, pending team decision:** none for now. CI catches issues on push, and Claude Code hooks will cover Claude's edits once linting exists. Revisit if lint failures in CI become frequent.
+
+## Decision
+
+The recommendation was accepted: 1A, 2A, 3A, 4A, 5A, 6A.
+
+- **Python:** uv workspace with one `uv.lock` at the root. Each package declares its own dependencies. CI installs only the light packages, using `uv sync --package <name>`. Ruff for lint and format, pytest for tests.
+- **TypeScript:** npm workspaces. ESLint (flat config, typescript-eslint, react-hooks plugin) with Prettier and eslint-config-prettier. Vitest for tests.
+- **CI:** GitHub Actions.
+- **Fallback:** if 1A's uv behaviour does not work as documented, use 1B for the heavy packages only, and record the change.
+
+Team operating systems: all four members use Windows laptops. R7 therefore means Windows locally and Linux in CI.
+
+### Conditions
+
+- **Placeholder tests.** Both languages get real placeholder tests on the empty scaffold. `passWithNoTests` is not used, so a broken test glob cannot pass silently.
+- **Line endings.** Add a root `.gitattributes` that normalizes text files to LF (for example `* text=auto eol=lf`), with binary file types marked `binary`. This keeps Prettier and Ruff format checks consistent between Windows checkouts and Linux CI. It is added to P0-03's Files line (see follow-up edits).
+- **`--package` behaviour.** Confirm the exact `uv sync --package` behaviour against the official uv workspaces page during implementation before relying on it in CI.
+
+### Answers to the open questions
+
+1. **CI runners:** `ubuntu-latest` on every push. An additional `windows-latest` job (lint and tests) runs only on pull requests to `main`.
+2. **ONNX-only CI job:** added in P1-24, as proposed. No ONNX Runtime in CI before then.
+3. **Python lint:** one command, a root npm script that runs `ruff check` and then `ruff format --check`, as proposed.
+4. **Type checking:** deferred to P1-07, as proposed.
+5. **Pre-commit hooks:** none for now, as proposed.
+
+### Facts verified at decision time
+
+These were checked by the decider against the sources named. They replace the matching "to verify" items in Options and Open questions.
+
+| Item | Finding | Source |
+|---|---|---|
+| uv workspaces | One lockfile per workspace. `uv sync` and `uv run` accept `--package` to target a member. Exact `--package` sync behaviour still to confirm during implementation. | docs.astral.sh/uv/concepts/projects/workspaces/ |
+| Vitest with no tests | `passWithNoTests` defaults to false. | vitest.dev config docs |
+| GitHub Actions minutes | GitHub Free: 2,000 minutes/month for private repos, billed to the repo owner. The default $0 spending limit blocks overage. Windows runners cost more per minute than Linux. | Decider's check of GitHub billing docs |
+| npm on Windows | npm runs scripts through cmd.exe, which supports `&&`. | Decider's check |
+
+The corepack (3B) and Biome (4B) items no longer apply because those options were not chosen.
+
+### Licences of chosen tools
+
+None of these were confirmed in this repo. All are expected to be permissive, and each stays **to verify** against the linked repository before the dependency is added in P0-03.
+
+| Tool | Expected licence | Link |
+|---|---|---|
+| uv | MIT or Apache-2.0 (dual), to verify | https://github.com/astral-sh/uv |
+| Ruff | MIT, to verify | https://github.com/astral-sh/ruff |
+| pytest | MIT, to verify | https://github.com/pytest-dev/pytest |
+| ESLint | MIT, to verify | https://github.com/eslint/eslint |
+| typescript-eslint | MIT, to verify | https://github.com/typescript-eslint/typescript-eslint |
+| eslint-plugin-react-hooks | MIT, to verify | https://github.com/facebook/react (packages/eslint-plugin-react-hooks) |
+| Prettier | MIT, to verify | https://github.com/prettier/prettier |
+| eslint-config-prettier | MIT, to verify | https://github.com/prettier/eslint-config-prettier |
+| Vitest | MIT, to verify | https://github.com/vitest-dev/vitest |
+| TypeScript | Apache-2.0, to verify | https://github.com/microsoft/TypeScript |
