@@ -1,0 +1,40 @@
+# Secrets. Copy .env.example to .env and keep .env out of git.
+.env
+.env.*
+!.env.example
+
+# Video
+*.mp4
+*.webm
+*.mov
+*.avi
+*.mkv
+
+# Landmark dumps. Test fixtures are JSON, so these are never committed.
+*.npy
+*.npz
+
+# Model weights
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.safetensors
+
+# ml/data holds manifests and split definitions only. Raw data, extracted
+# landmarks and downloaded datasets stay out of git.
+/ml/data/*
+!/ml/data/*.md
+!/ml/data/scripts/
+!/ml/data/manifests/
+!/ml/data/splits/
+
+# Personal Claude Code settings
+.claude/settings.local.json
+
+# Build output and environments
+node_modules/
+__pycache__/
+.venv/
+dist/
+build/
