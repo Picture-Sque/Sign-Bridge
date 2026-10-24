@@ -4,12 +4,12 @@ description: Implement exactly one task from docs/tasks.md by its ID (for exampl
 argument-hint: <task-id>
 disable-model-invocation: true
 metadata:
-  version: "0.2.1"
+  version: "0.2.2"
 ---
 
 # implement-task
 
-Version 0.2.1. Decision tasks need an Accepted record (0.2.1); revised after the first real run, P0-02 (0.2).
+Version 0.2.2. Revised after the P0-03 run: no destructive git, placeholders, CI round trip, merge order (0.2.2). Decision tasks need an Accepted record (0.2.1); revised after the first real run, P0-02 (0.2).
 
 Task ID: $0
 
@@ -27,7 +27,11 @@ Never do any of these without the user explicitly approving that specific action
 
 These exist because the docs are the team's shared source of truth, and the task status drives what others start next. A wrong "done" sends someone else down a blocked path.
 
+Never use `git checkout -- <path>`, `git restore`, `git reset`, `git clean`, `git stash` or similar commands to undo edits, including temporary edits made to test that a check fails. They can wipe out work you did not make. Make throwaway changes in a scratch copy outside the repo, or in new files you then delete by name. Undo them with targeted edits, or with `git revert` of one specific commit. In P0-03 a command that included `git checkout -- .` was denied, and it turned out it wasn't needed.
+
 If anything in the task is ambiguous, ask one question and wait. Do not fill the gap with a plausible guess. The PRD and CLAUDE.md both say TBD values come from measurement or a team decision.
+
+If the user's message contains an unfilled placeholder, such as `[paste]`, `[green/red]` or `[e.g. ...]`, ask for the real value. Do not read it from the machine, infer it from context, or pick the likeliest option, and do not proceed on that point until the user answers. Work that doesn't depend on the value may continue within the current step, but never past a STOP gate. A placeholder usually means the user meant to check something themselves, and a value you supply hides that the check never happened.
 
 ## Step 1: Read
 
@@ -125,6 +129,18 @@ P1-07: add LandmarkPacket and Caption v1 schemas
 
 Add any attribution lines your environment requires. Do not push.
 
+### CI round trip
+
+Use this when the task's Test line needs CI to fail and then pass, for example "push a branch with a deliberate lint error and a failing test; CI fails; fix both; CI passes". The work commit from Step 10 must already be on the branch.
+
+1. Make one throwaway commit on top of the work, with the message `<task-id>: throwaway CI check (...)`. Put the deliberate failures in new files only, each with exactly one intended problem and otherwise passing lint and format, so the red run can only come from those failures. Show locally that each command exits non-zero.
+2. Ask the user to push. Tell them which jobs should go red and at which steps. Tell them not to open the PR yet if any job runs only on pull requests, because it would run against the red commit.
+3. **STOP.** Wait for the user to confirm CI is red, and that every expected step failed rather than being skipped.
+4. Run `git revert` on the throwaway commit only, and commit the result. Never revert or reset anything else.
+5. Ask the user to push and confirm CI is green. Then they can open the PR, which runs any PR-only jobs.
+
+CI runs only on the tip of each push. If several commits go up together, the red run belongs to the tip commit, not to the throwaway commit itself. Record the commit hashes CI actually ran on in the evidence table and the PR description. In P0-03 the red run was on `83a50f9`, not on the throwaway `8b99509`.
+
 ## Step 11: Independent check
 
 Ask the user to run `/verify-task $0` on this branch. It runs in a fresh context and checks the files, not your reports.
@@ -170,3 +186,5 @@ Status: <old> -> <new> (commit <short hash>)
 ```
 
 Add any attribution lines your environment requires for PR descriptions.
+
+End by reminding the user of the merge order. Merge the PR only after verify-task has passed and the status commit from Step 12 is on the same branch. Then the work and its status ship in one PR. In P0-03 the work PR was merged before verify-task ran, so a second PR was needed just for the status change.
