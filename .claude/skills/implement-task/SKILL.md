@@ -1,15 +1,15 @@
 ---
 name: implement-task
-description: Implement exactly one task from docs/tasks.md by its ID (for example /implement-task P1-07), from dependency check through plan, approval, code, tests, evidence and commit. Use it whenever a team member wants to start or continue work on a numbered task. Do not use it for tasks tagged External (use /human-handoff), for a task tagged Decision that has no record in docs/decisions/ yet (use /decision-record), to independently check finished work (use /verify-task), or for work that is not in docs/tasks.md.
+description: Implement exactly one task from docs/tasks.md by its ID (for example /implement-task P1-07), from dependency check through plan, approval, code, tests, evidence and commit. Use it whenever a team member wants to start or continue work on a numbered task. Do not use it for tasks tagged External (use /human-handoff), for a task tagged Decision whose record in docs/decisions/ is missing or not yet Accepted (use /decision-record), to independently check finished work (use /verify-task), or for work that is not in docs/tasks.md.
 argument-hint: <task-id>
 disable-model-invocation: true
 metadata:
-  version: "0.2"
+  version: "0.2.1"
 ---
 
 # implement-task
 
-Version 0.2. Revised after the first real run (P0-02).
+Version 0.2.1. Decision tasks need an Accepted record (0.2.1); revised after the first real run, P0-02 (0.2).
 
 Task ID: $0
 
@@ -39,7 +39,11 @@ If anything in the task is ambiguous, ask one question and wait. Do not fill the
 ## Step 2: Check tags
 
 - **External:** some or all of the task depends on people outside the team. Do not do the external part. Tell the user which part is external and that `/human-handoff $0` covers it. If the task also has code (P1-17a, for example), the code may only start once the external precondition is recorded in the repo. If it is not, stop.
-- **Decision:** check docs/decisions/ for a record covering this task. If there is none, stop and point the user to `/decision-record $0`. Code built before the decision tends to bake in an unapproved choice.
+- **Decision:** find the record for this task in docs/decisions/ and read its Status. Code built before the decision tends to bake in an unapproved choice.
+  - `Accepted`: continue.
+  - No record, or `Proposed`: stop and point the user to `/decision-record $0`.
+  - `Proposed (needs measurement)`: continue, but build only the measurement the record describes. Mark that code as throwaway in the plan. The task cannot be marked done until the record is Accepted.
+  - `Rejected` or `Superseded by NNNN`: stop and show the status. The task probably needs a new record.
 
 Point the user to the other skill rather than invoking it yourself. Skill-to-skill handoff is not a documented Claude Code pattern.
 
@@ -131,7 +135,7 @@ Ask the user to run `/verify-task $0` on this branch. It runs in a fresh context
 
 Propose the exact change to the task's Status line in docs/tasks.md:
 
-- `done` only if verify-task reports no fail and the user has confirmed each "needs human check" row.
+- `done` only if verify-task reports no fail and the user has confirmed each "needs human check" row. For a Decision task, the record must also be Accepted.
 - Otherwise `in progress`, with a note of what remains.
 
 **STOP.** Apply it only after the user approves. Commit it on the same task branch, as a separate commit, so the status change ships in the same PR as the work:
